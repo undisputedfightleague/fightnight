@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>UFL CAF</title>
+<title>UFL FIGHT NIGHT</title>
 
 
 
@@ -27,17 +27,27 @@
 
 
 /* ==============================
-   🎮 FUTURISTIC CAF LEAGUE THEME
+   🟥 FIGHT NIGHT CHAMPION THEME
    ============================== */
    :root {
-  --bg-main: #06080f; /* deep navy black */
-  --bg-card: #0f1624; /* dark blue-gray */
-  --accent: #015085; /* neon cyan */
-  --accent-2: #015085; /* deeper electric blue */
-  --text-main: #e0f7ff;
-  --text-muted: #9fc9d9;
-  --highlight: #00fff7;
-  --shadow: rgba(0, 255, 255, 0.25);
+  /* CORE RED (Fight Night Champion style) */
+  --red-main: #B11226;
+
+  /* BACKGROUNDS */
+  --bg-main: #020409;     /* deep near-black */
+  --bg-card: #07121d;     /* dark steel blue */
+
+  /* ACCENTS */
+  --accent: var(--red-main);
+  --accent-2: var(--red-main);
+  --highlight: var(--red-main);
+
+  /* TEXT */
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+
+  /* SHADOW / GLOW */
+  --shadow: rgba(177, 18, 38, 0.35);
 }
 
 /* ======================
@@ -719,17 +729,70 @@ html, body {
 }
 
 
+/* 🔴 FORCE MAIN HEADINGS RED */
+h1,
+h2,
+h3,
+.header,
+.champion-title,
+.champ-title,
+.champ-name,
+.players-header,
+.fights-header {
+  color: var(--accent) !important;
+}
+
+/* 🔴 ACTIVE TAB = RED */
+.tab-btn.active,
+.tab-active {
+  color: var(--accent) !important;
+  border-bottom: 2px solid var(--accent) !important;
+  text-shadow: 0 0 8px rgba(196, 32, 0, 0.6);
+}
 
 
+.tab-btn:hover {
+  color: var(--accent);
+}
 
+/* ===============================
+   TAB COLOR FINAL RULES
+   =============================== */
 
+/* INACTIVE TAB = WHITE */
+.tab-btn:not(.active):not(.tab-active) {
+  color: #ffffff !important;
+}
+
+/* HOVER (INACTIVE ONLY) = GREY */
+.tab-btn:hover:not(.active):not(.tab-active) {
+  color: #cfcfcf !important;
+  border-bottom: 2px solid #555 !important;
+  transform: translateY(-1px);
+  text-shadow: none !important;
+}
+
+/* ACTIVE TAB = RED */
+.tab-btn.active,
+.tab-btn.tab-active {
+  color: var(--accent) !important;
+  border-bottom: 2px solid var(--accent) !important;
+  text-shadow: 0 0 8px rgba(196, 32, 0, 0.6);
+}
+
+/* SMOOTH TRANSITIONS */
+.tab-btn {
+  transition: color 0.2s ease,
+              border-bottom 0.2s ease,
+              transform 0.15s ease;
+}
 
 </style>
 </head>
 <body>
   <div class="container">
     <div class="frosted" style="margin-bottom:12px;">
-      <div class="header">UFL CAF RANKINGS</div>
+      <div class="header">UFL FIGHT NIGHT</div>
       <div class="submuted">HOME OF THE BEST</div>
     </div>
 <!-- END Part 1 of 6 -->
@@ -744,7 +807,7 @@ html, body {
   </button>
 
   <button id="btn-world" class="tab-btn tab-active" onclick="switchTab('world')">
-    <i class="fas fa-globe-americas"></i>&nbsp;UFL CAF
+    <i class="fas fa-globe-americas"></i>&nbsp;WORLD RANKINGS
   </button>
 
   <button id="btn-players" class="tab-btn" onclick="switchTab('players')">
@@ -809,7 +872,7 @@ html, body {
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <h2 style="margin:0;font-family:Orbitron;">UFL CAF TOP 30</h2>
+          <h2 style="margin:0;font-family:Orbitron;">UFL FIGHT NIGHT TOP 30</h2>
         </div>
         <div id="caf-rankings" class="rank-list"></div>
       </div>
@@ -1416,42 +1479,18 @@ if (isWin && f.method && /ko|tko/i.test(f.method)) {
     }
     breakdown.modifiers += bonus;
 
-    // 💪 Opponent Strength (combined record)
-    const mainFighter = fighterIds[0];
-    const oppId = fighterIds.includes(f.fighter1) ? f.fighter2 : f.fighter1;
-    const oppCombined = combined.find(c => c.ids.includes(oppId));
-    let oppStrengthBonus = 0;
-
-    if (oppCombined) {
-      const totalFights = oppCombined.wins + oppCombined.losses + oppCombined.draws;
-      if (totalFights > 0) {
-        const oppWinPct = oppCombined.wins / totalFights;
-        oppStrengthBonus = (oppWinPct - 0.5) * 3; // slightly stronger weighting
-        if (f.winner === mainFighter && oppStrengthBonus < 0) oppStrengthBonus = 0; // never penalize win
-        oppStrengthBonus = Math.max(-2, Math.min(oppStrengthBonus, 2)); // cap
-        base += oppStrengthBonus;
-        breakdown.opponent += oppStrengthBonus;
-      }
-    }
+    
     // 🔝 Contender Fight Bonus (Top 10 vs Top 10)
 // 🔝 Contender Fight Bonus (Top 10 involvement)
-if (f1Rank <= 10 || f2Rank <= 10) {
-  multiplier *= 1.15;
-  breakdown.contender += (base + bonus) * 0.15; // 🆕 track separately
-
-}
+// if (f1Rank <= 10 || f2Rank <= 10) {
+ //  multiplier *= 1.15;
+ // breakdown.contender += (base + bonus) * 0.15; // 🆕 track separately
 
 
 
-    // ⏱ Recency bump (within 10 days)
-    const daysSince = daysBetween(f.date, now);
-   
-    
-    if (daysSince <= 20) { // or 10 depending on your threshold
-  multiplier *= 1.15;
-  breakdown.recency += Math.max(0, (base + bonus) * 0.15);
- // record approximate bonus
-}
+
+
+
 
     points += (base + bonus) * multiplier;
   });
@@ -1574,7 +1613,7 @@ function renderChampionCard(type, container) {
   const champData = fighters.find(f => f.id === champId);
 
   // friendly title and defense/last-defense lookups
-  const title = (field === 'uflCAF') ? 'UFL CAF CHAMPION' : 'UFL WORLD CHAMPION';
+  const title = (field === 'uflCAF') ? 'UFL WORLD CHAMPION' : 'UFL WORLD CHAMPION';
   const defenses = (field === 'uflCAF') ? (champions.uflCAFDefenses || 0) : (champions.uflWorldDefenses || 0);
   const lastDefense = (field === 'uflCAF') ? champions.uflCAFLastDefense : champions.uflWorldLastDefense;
 
