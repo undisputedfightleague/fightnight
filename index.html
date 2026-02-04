@@ -790,11 +790,31 @@ h3,
 </style>
 </head>
 <body>
-  <div class="container">
-    <div class="frosted" style="margin-bottom:12px;">
-      <div class="header">UFL FIGHT NIGHT</div>
-      <div class="submuted">HOME OF THE BEST</div>
-    </div>
+
+
+
+  <div style="
+  background:black;
+  padding:15px 0;
+  display:flex;
+  justify-content:center;
+">
+  <img
+    src="https://cdn.discordapp.com/attachments/1292632666637598803/1468728206520746236/Untitled-1.png?ex=6985133c&is=6983c1bc&hm=dec2eea0f22d72861cd5e8ed7bfc20ba13cd3bc289fa415f4773e088f6611234&"
+    alt="UFL Fight Night"
+    style="max-width:320px; width:100%; display:block;"
+  />
+</div>
+
+
+
+   
+  
+  
+  
+
+
+
 <!-- END Part 1 of 6 -->
 <!-- START Part 2 of 6 -->
 
@@ -828,7 +848,7 @@ h3,
 <!-- 🏠 HOME TAB -->
 <div id="home-tab" class="tab-content">
 
-  <h1>UFL RANKINGS BREAKDOWN</h1>
+  <h1>RANKING POINTS BREAKDOWN</h1>
   
 
   <ul style="list-style:none;padding:0;">
@@ -843,18 +863,12 @@ h3,
     <br> </br>
     <li><b>FINISH BONUS</b>
       <li>TKO/KO Win: +1 Point</li>
-      <br> </br>
-      <li><b>OPPONENT QUALITY</b>
-        <li>Wins over opponents with high win percentages earns a small bonus</li>
-        <br> </br>
-        <li><b>RECENCY BONUS</b>
-          <li>Awards recent activity</li>
+    
+       
           <br> </br>
           <li><b>WINNING STREAK</b>
             <li>After 3 consecutive wins, each additional win earns +1 (capped at +5)</li>
-            <br> </br>
-            <li><b>CONTENDER BONUS</b>
-              <li>Small bonus if either fighter is ranked inside the top 10</li>
+          
               <br> </br>
               <li><b>INACTIVITY</b>
                 <li>After 20 days of inactivity, total points gradually decay</li>
@@ -1392,14 +1406,8 @@ if (totalFights >= 4 && totalFights < 8 && winPct >= 0.8) {
   /*
    Scoring summary (you requested):
     - Win = +3 points
-    - Loss = -2 points (escalates by −0.25 per consecutive loss)
+    - Loss = -1.5 points (escalates by −0.25 per consecutive loss)
     - Draw = +1 point
-    - Title Capture = +2
-    - Title Defense = +3
-    - Championship fight multiplier = ×1.5
-    - Defense fight multiplier = ×1.5
-    - Contender multiplier = ×1.25 (both top 10)
-    - Recency bonus: ×1.2 for fights within 10 days
     - Decay: lose 1% per day inactive after 10 days (max −20%)
   */
   
