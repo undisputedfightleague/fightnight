@@ -965,15 +965,15 @@ h3,
           <h4 style="margin:6px 0;">Add Fighter</h4>
           <div style="display:flex;gap:8px;align-items:center;">
            
-            <input id="add-fighter-name" placeholder="Name" style="flex:2;" />
+            <input id="add-fighter-name" placeholder="Name" style="flex:1;" />
 
-<select id="add-fighter-region" style="padding:8px;border-radius:6px;">
-  <option value="NA">NA</option>
-  <option value="EU">EU</option>
-</select>
-
-           
+            <select id="add-fighter-region" style="padding:8px;">
+              <option value="NA">NA</option>
+              <option value="EU">EU</option>
+            </select>
+            
             <button class="btn btn-primary" onclick="adminAddFighter()">Add</button>
+            
           </div>
         </div>
 
@@ -2246,34 +2246,41 @@ function closePlayerCard() {
   }
   
   /* Admin: Add Fighter */
-  function adminAddFighter() {
+  async function adminAddFighter() {
   const name = document.getElementById("add-fighter-name").value.trim();
   const region = document.getElementById("add-fighter-region").value;
 
-  if (!name) return;
+  if (!name) return alert("Enter a fighter name");
 
-  fighters.push({
-    name,
-    region,   // 👈 STORED
-    retired: false,
-    wins: 0,
-    losses: 0,
-    draws: 0
-  });
+  try {
+    await db.collection("fighters").add({
+      name,
+      region,
+      retired: false,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      koWins: 0,
+      createdAt: new Date().toISOString()
+    });
 
-  saveFighters();
-  refreshRankings();
+    document.getElementById("add-fighter-name").value = "";
 
+    showAdminToast(`Fighter added (${region})`);
 
-  populateAdminFighters();
-populateEditFightSelects();
-populateChampionTitleSelects();
+    // UI refresh (Firestore listener should also catch this)
+    setTimeout(() => {
+      populateAdminFighters();
+      populateEditFightSelects();
+      populateChampionTitleSelects();
+    }, 300);
 
-
-  document.getElementById("add-fighter-name").value = "";
-
-  showAdminToast(`Fighter added (${region})`);
+  } catch (e) {
+    console.error("Add fighter failed:", e);
+    alert("Failed to add fighter");
+  }
 }
+
 
   
   /* Recompute ALL fighter stats from fights (safe canonical source of truth) */
