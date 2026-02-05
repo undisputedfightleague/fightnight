@@ -851,32 +851,57 @@ h3,
   <h1>RANKING BREAKDOWN</h1>
   
 
-  <ul style="list-style:none;padding:0;">
-    <br>
-    <li><b>BASE POINTS</b>
+  <div style="max-width:800px;margin:auto;line-height:1.6;">
 
-      
-
-    <li>Win: +3 Points</li>
-    <li>Draw: +1 Point</li>
-    <li>Loss: -1 (increasing with each consecutive loss)</li>
-    <br> </br>
-    <li><b>FINISH BONUS</b>
-      <li>TKO/KO Win: +1 Point</li>
+    <ul style="list-style:none;padding:0;">
+  
+      <li><b>🥊 BASE FIGHT RESULTS</b></li>
+      <li>Win: <b>+3 Points</b></li>
+      <li>Draw: <b>+1 Point</b></li>
+      <li>Loss: <b>−1 Point</b></li>
+      <li>Consecutive losses increase the penalty for each additional loss</li>
+  
+      <br>
+  
+      <li><b>🥊 FINISH BONUS</b></li>
+      <li>KO / TKO Win: <b>+1 Bonus Point</b></li>
     
-       
-          <br> </br>
-          <li><b>WINNING STREAK</b>
-            <li>After 3 consecutive wins, each additional win earns +1 (capped at +5)</li>
-          
-              <br> </br>
-              <li><b>INACTIVITY</b>
-                <li>After 20 days of inactivity, total points gradually decay</li>
+  
+      <br>
+  
+      <li><b>📊 OPPONENT STRENGTH</b></li>
+      <li>Beating a higher-ranked opponent earns a small bonus</li>
+      <li>Losing to a much lower-ranked opponent adds a small penalty</li>
+    
+  
+      <br>
+  
+      <li><b>🔥 WIN STREAK MOMENTUM</b></li>
+      <li>After <b>3 consecutive wins</b>, each additional win earns <b>+1 Point</b></li>
+      <li>Streak bonus is capped at <b>+5 Points</b></li>
+      <li>Any loss resets the streak</li>
+  
+      <br>
+  
+      <li><b>⏳ INACTIVITY DECAY</b></li>
+      <li>After <b>20 days without a fight</b>, total points begin to decay</li>
+      <li>Decay increases gradually the longer a fighter is inactive</li>
+      <li>Decay is capped to prevent extreme drops</li>
+      <li>Fighting immediately stops inactivity decay</li>
+  
+      <br>
   
   
   
+      <li><b>🧮 FINAL SCORE</b></li>
+      <li>All bonuses and penalties are combined into a final ranking score</li>
+      <li>Scores are rounded to whole numbers</li>
+      <li>Rankings update automatically after each fight</li>
   
-</div>
+    </ul>
+  
+  </div>
+  
 
 
   <div id="world-tab" class="tab-panel">
@@ -2623,4 +2648,3 @@ await recomputeAllFighterStats();
   </html>
   <!-- END Part 6 of 6 -->
         
-
