@@ -990,16 +990,32 @@ h3,
           </div>
           <hr style="margin:8px 0;">
           <h4 style="margin:6px 0;">Add Fight</h4>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;">
-            
+   
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <label>Fighter A</label>
+            <label>Fighter B</label>
             <select id="add-fight-f1"></select>
             <select id="add-fight-f2"></select>
-            <select id="add-fight-method"><option>KO/TKO</option><option>Decision</option><option>Draw</option></select>
-            <select id="add-fight-winner"><option value="0">Draw</option></select>
+          
+            <label>Method</label>
+            <label>Winner</label>
+            <select id="add-fight-method">
+              <option>KO/TKO</option>
+              <option>Decision</option>
+              <option>Draw</option>
+            </select>
+            <select id="add-fight-winner"></select>
+          
+            <label>Date</label>
+            <div></div>
             <input id="add-fight-date" type="date" />
-            
-            <button class="btn btn-primary" onclick="adminAddFight()">Add Fight</button>
+          
+            <button class="btn btn-primary" style="grid-column:span 2;" onclick="adminAddFight()">Add Fight</button>
           </div>
+          
+
+
         </div>
 
         <div class="frosted" style="grid-column:span 2;">
