@@ -955,7 +955,7 @@ h3,
           <div style="margin-top:8px;">
             
             <table>
-              <thead><tr><th>Name</th><th>Platform</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th>Region</th><th>Actions</th></tr></thead>
               <tbody id="admin-fighters-list"></tbody>
             </table>
             
@@ -2084,7 +2084,8 @@ function closePlayerCard() {
     if(editWinner) { editWinner.innerHTML = '<option value="0">Draw</option>'; }
   
     fList.forEach(f=>{
-      const optHtml = `<option value="${f.id}">${escapeHtml(f.name)} (${escapeHtml(f.platform||'—')})</option>`;
+      const optHtml = `<option value="${f.id}">${escapeHtml(f.name)} (${escapeHtml(f.region||'—')})</option>`;
+
       if(addF1) addF1.insertAdjacentHTML('beforeend', optHtml);
       if(addF2) addF2.insertAdjacentHTML('beforeend', optHtml);
       if(editF1) editF1.insertAdjacentHTML('beforeend', optHtml);
@@ -2246,6 +2247,12 @@ function closePlayerCard() {
 
   saveFighters();
   refreshRankings();
+
+
+  populateAdminFighters();
+populateEditFightSelects();
+populateChampionTitleSelects();
+
 
   document.getElementById("add-fighter-name").value = "";
 
@@ -2509,7 +2516,8 @@ await recomputeAllFighterStats();
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${escapeHtml(f.name)} ${f.retired ? '<span style="color:#f87171;font-size:12px;margin-left:6px;">[Retired]</span>' : ''}</td>
-        <td>${escapeHtml(f.platform||'—')}</td>
+        <td>${escapeHtml(f.region || '—')}</td>
+
         
         <td>
           <button class="btn" onclick="openEditFighter('${f.id}')"><i class="fas fa-edit"></i></button>
