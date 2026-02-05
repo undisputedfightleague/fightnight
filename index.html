@@ -31,11 +31,11 @@
    ============================== */
    :root {
   /* CORE RED (Fight Night Champion style) */
-  --red-main: #B11226;
+  --red-main: #E1BA40;
 
   /* BACKGROUNDS */
   --bg-main: #020409;     /* deep near-black */
-  --bg-card: #07121d;     /* dark steel blue */
+  --bg-card: #000000;     /* dark steel blue */
 
   /* ACCENTS */
   --accent: var(--red-main);
@@ -964,7 +964,14 @@ h3,
           <hr style="margin:8px 0;">
           <h4 style="margin:6px 0;">Add Fighter</h4>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input id="add-fighter-name" placeholder="Name" style="flex:1;" />
+           
+            <input id="add-fighter-name" placeholder="Name" style="flex:2;" />
+
+<select id="add-fighter-region" style="padding:8px;border-radius:6px;">
+  <option value="NA">NA</option>
+  <option value="EU">EU</option>
+</select>
+
            
             <button class="btn btn-primary" onclick="adminAddFighter()">Add</button>
           </div>
@@ -2222,18 +2229,29 @@ function closePlayerCard() {
   }
   
   /* Admin: Add Fighter */
-  function adminAddFighter(){
-    const name = ($('add-fighter-name')?.value || '').trim();
-    const platform = ($('add-fighter-platform')?.value || '').trim();
-    if(!name) return alert('Enter a name');
-    const payload = { name, platform, wins:0, losses:0, draws:0, koWins:0, retired:false, isCAF:false };
-    db.collection('fighters').add(payload).then(()=> {
-      $('add-fighter-name').value = '';
-      populateEditFightSelects();
-      populateAdminFighters();
-      alert('Fighter added.');
-    }).catch(e=>{ console.error(e); alert('Failed to add fighter'); });
-  }
+  function adminAddFighter() {
+  const name = document.getElementById("add-fighter-name").value.trim();
+  const region = document.getElementById("add-fighter-region").value;
+
+  if (!name) return;
+
+  fighters.push({
+    name,
+    region,   // 👈 STORED
+    retired: false,
+    wins: 0,
+    losses: 0,
+    draws: 0
+  });
+
+  saveFighters();
+  refreshRankings();
+
+  document.getElementById("add-fighter-name").value = "";
+
+  showAdminToast(`Fighter added (${region})`);
+}
+
   
   /* Recompute ALL fighter stats from fights (safe canonical source of truth) */
   async function recomputeAllFighterStats(){
@@ -2564,6 +2582,10 @@ await recomputeAllFighterStats();
   
   /* Kick off initial setup after listeners have time to fill data */
   setTimeout(initPage, 600);
+
+
+
+  
   </script>
   
   </body>
