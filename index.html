@@ -800,7 +800,7 @@ h3,
   justify-content:center;
 ">
   <img
-    src="https://cdn.discordapp.com/attachments/1292632666637598803/1468728206520746236/Untitled-1.png?ex=698b01fc&is=6989b07c&hm=ed15d4e21ec5a5131f063210217639a66c065436786f61f400807ffb49917b05&"
+    src="https://github.com/undisputedfightleague/ufl-assets/blob/main/UFL%20Fight%20Night%20Logo.png?raw=true"
     alt="UFL Fight Night"
     style="max-width:320px; width:100%; display:block;"
   />
@@ -901,8 +901,8 @@ h3,
     </ul>
   
   </div>
+  
 </div>
-
 
   <div id="world-tab" class="tab-panel">
     <div class="grid-main">
@@ -1462,6 +1462,9 @@ if (totalFights >= 4 && totalFights < 8 && winPct >= 0.8) {
   // ---------------------------------------------
 // 📅 Utility: Days Between Dates
 // ---------------------------------------------
+// ---------------------------------------------
+// 📅 Utility: Days Between Dates
+// ---------------------------------------------
 function daysBetween(d1, d2) {
   try {
     const date1 = new Date(d1), date2 = new Date(d2);
@@ -1473,13 +1476,21 @@ function daysBetween(d1, d2) {
 }
 
 // ---------------------------------------------
-// 🧮 Main Ranking Calculator
+// 🆔 Utility: Normalize IDs (prevents string/number mismatch bugs)
+// ---------------------------------------------
+function normId(x) {
+  if (x === null || x === undefined) return '';
+  return String(x).split(':').pop(); // keeps compatibility with ids like "abc:123"
+}
+
+// ---------------------------------------------
+// 🧮 Main Ranking Calculator (FIXED loss handling)
 // ---------------------------------------------
 function calculateRankPoints(fighterIds, returnBreakdown = false) {
   // --- Breakdown trackers (for Player Card)
   let breakdown = {
     base: 0,
-    finish: 0, // 🥊 NEW: tracks KO/TKO bonuses
+    finish: 0, // 🥊 tracks KO/TKO bonuses
     opponent: 0,
     recency: 0,
     streak: 0,
@@ -1488,44 +1499,73 @@ function calculateRankPoints(fighterIds, returnBreakdown = false) {
   };
 
   const now = new Date();
-  const combined = (typeof buildCombinedMap === 'function') ? buildCombinedMap() : [];
-  const combinedFights = fights.filter(
-    f => fighterIds.includes(f.fighter1) || fighterIds.includes(f.fighter2)
+
+  // Normalize fighter IDs once
+  const ids = (fighterIds || []).map(normId);
+  const idSet = new Set(ids);
+
+  // Pull fights involving any of the fighter IDs
+  let combinedFights = fights.filter(
+    f => idSet.has(normId(f.fighter1)) || idSet.has(normId(f.fighter2))
   );
 
-  if (combinedFights.length === 0) return returnBreakdown ? { ...breakdown, total: 0 } : 0;
+  if (combinedFights.length === 0) {
+    const out = { ...breakdown, total: 0 };
+    return returnBreakdown ? out : 0;
+  }
+
+  // ✅ Sort fights chronologically so streak/loss penalties apply correctly
+  combinedFights.sort((a, b) => {
+    const da = +new Date(a.date);
+    const db = +new Date(b.date);
+    return (Number.isFinite(da) ? da : 0) - (Number.isFinite(db) ? db : 0);
+  });
 
   let points = 0;
-  const consecutiveLosses = countConsecutiveLosses(fighterIds);
-  const lossPenalty = 1 + (0.5 * Math.max(0, consecutiveLosses - 1));
+
+  // ✅ Track losses in-order (instead of applying current streak to all past fights)
+  let runningConsecutiveLosses = 0;
 
   combinedFights.forEach(f => {
     let base = 0;
     let bonus = 0;
     let multiplier = 1.0;
 
-    const isWin = fighterIds.includes(f.winner);
-    const isDraw = f.winner === '0' || f.winner === 0;
+    const winner = normId(f.winner);
+    const isDraw = winner === '0' || winner === '';
+    const isWin = !isDraw && idSet.has(winner);
     const isLoss = !isWin && !isDraw;
 
-    const f1Rank = getCurrentRank(f.fighter1);
-    const f2Rank = getCurrentRank(f.fighter2);
-    const selfRank = fighterIds.includes(f.fighter1) ? f1Rank : f2Rank;
-    const oppRank = fighterIds.includes(f.fighter1) ? f2Rank : f1Rank;
+    // --- Update running streaks (chronological)
+    if (isLoss) runningConsecutiveLosses += 1;
+    else runningConsecutiveLosses = 0; // reset on win OR draw (change if you want draws to behave differently)
+
+    // --- Loss penalty increases only on consecutive losses AT THAT TIME
+    const lossPenalty = 1 + (0.5 * Math.max(0, runningConsecutiveLosses - 1));
+
+    // --- Rank values (use normalized IDs)
+    const f1 = normId(f.fighter1);
+    const f2 = normId(f.fighter2);
+
+    const f1Rank = getCurrentRank(f1);
+    const f2Rank = getCurrentRank(f2);
+
+    const selfRank = idSet.has(f1) ? f1Rank : f2Rank;
+    const oppRank  = idSet.has(f1) ? f2Rank : f1Rank;
     const rankDiff = Math.abs(selfRank - oppRank);
 
     // 🏆 Base system
     if (isWin) base += 3;
     if (isLoss) base -= lossPenalty;
     if (isDraw) base += 1;
-    breakdown.base += base;
 
     // 🥊 KO/TKO Finish Bonus
-if (isWin && f.method && /ko|tko/i.test(f.method)) {
-  base += 1; // small bonus
-  breakdown.finish += 1; // track in modifiers or create a separate "finishBonus" if you prefer
-}
+    if (isWin && f.method && /ko|tko/i.test(f.method)) {
+      base += 1;              // award the bonus into base points
+      breakdown.finish += 1;  // track separately
+    }
 
+    breakdown.base += base;
 
     // 🧩 Rank differential adjustment
     if (isWin && selfRank > oppRank) {
@@ -1533,25 +1573,19 @@ if (isWin && f.method && /ko|tko/i.test(f.method)) {
     } else if (isLoss && selfRank < oppRank) {
       bonus -= Math.min(rankDiff * 0.025, 0.5);
     }
+
     breakdown.modifiers += bonus;
 
-    
-    // 🔝 Contender Fight Bonus (Top 10 vs Top 10)
-// 🔝 Contender Fight Bonus (Top 10 involvement)
-// if (f1Rank <= 10 || f2Rank <= 10) {
- //  multiplier *= 1.15;
- // breakdown.contender += (base + bonus) * 0.15; // 🆕 track separately
-
-
-
-
-
-
+    // 🔝 Contender bonus block left as-is (currently disabled in your code)
+    // if (f1Rank <= 10 || f2Rank <= 10) {
+    //   multiplier *= 1.15;
+    //   breakdown.contender += (base + bonus) * 0.15;
+    // }
 
     points += (base + bonus) * multiplier;
   });
 
-  // 🧨 Win streak momentum bonus
+  // 🧨 Win streak momentum bonus (your existing logic)
   const streak = countConsecutiveWins(fighterIds);
   if (streak >= 3) {
     const streakBonus = Math.min((streak - 2) * 1, 5);
@@ -1559,90 +1593,73 @@ if (isWin && f.method && /ko|tko/i.test(f.method)) {
     breakdown.streak += streakBonus;
   }
 
-  // 🧮 Inactivity decay
-const lastFight = combinedFights.length
-  ? new Date(Math.max(...combinedFights.map(f => new Date(f.date))))
-  : null;
+  // 🧮 Inactivity decay (safer date handling)
+  const lastFightMs = Math.max(
+    ...combinedFights
+      .map(f => +new Date(f.date))
+      .filter(ms => Number.isFinite(ms))
+  );
 
-if (lastFight) {
-  const inactiveDays = daysBetween(lastFight, now);
-  if (inactiveDays > 20) {
-    const decayRate = Math.min((inactiveDays - 20) * 0.005, 0.15);
-    
-    // 🧠 Track the decay penalty for Ranking Breakdown
-    const decayLoss = points * decayRate;
-    breakdown.modifiers -= decayLoss; // record decay as a negative impact
+  if (Number.isFinite(lastFightMs)) {
+    const inactiveDays = daysBetween(new Date(lastFightMs), now);
+    if (inactiveDays > 20) {
+      const decayRate = Math.min((inactiveDays - 20) * 0.005, 0.15);
 
-    points *= (1 - decayRate);
+      // Track decay as negative modifier
+      const decayLoss = points * decayRate;
+      breakdown.modifiers -= decayLoss;
+
+      points *= (1 - decayRate);
+    }
   }
 
-  }
-
-  // 👑 (Optional) Champion bonuses — currently disabled
-  // const championKeys = [
-  //   'uflWorld', 'uflCAF', 'uflPC', 'uflPS5', 'uflXbox',
-  //   'rbcPC', 'rbcPS5', 'rbcXbox'
-  // ];
-  // for (const key of championKeys) {
-  //   if (champions[key] && fighterIds.includes(champions[key])) {
-  //     points += 10;
-  //     breakdown.modifiers += 10;
-  //   }
-  // }
-
-// ✅ Final breakdown + return
-breakdown.total = Math.round(points);
-
-if (returnBreakdown) {
-  return breakdown;
-}
-
-return breakdown.total;
-
+  // ✅ Final breakdown + return
+  breakdown.total = Math.round(points);
+  return returnBreakdown ? breakdown : breakdown.total;
 }
 
 // ---------------------------------------------
 // 📊 Helpers & Ranking Render Pipeline
 // ---------------------------------------------
 function getCurrentRank(fid) {
-  const all = buildCombinedMap();
-  const ranked = all.sort((a, b) => b.points - a.points);
-  const index = ranked.findIndex(r => r.ids.includes(fid));
+  const id = normId(fid);
+  const all = (typeof buildCombinedMap === 'function') ? buildCombinedMap() : [];
+  const ranked = all.slice().sort((a, b) => (b.points || 0) - (a.points || 0));
+  const index = ranked.findIndex(r => (r.ids || []).map(normId).includes(id));
   return index >= 0 ? index + 1 : 999;
 }
 
 function computeRankings() {
-  const combined = (typeof buildCombinedMap === 'function') ? buildCombinedMap() : [];
+  const combined = (typeof buildCombinedMap === 'function') ? buildCombinedMap() : [];
 
-  // Exclude retired fighters and the current CAF champion only
-  const activeOnly = combined.filter(f => {
-    const main = fighters.find(x => x.id === f.idMain);
-    const isChampion = champions?.uflCAF && f.ids.includes(champions.uflCAF);
-    return !main?.retired && !isChampion;
-  });
+  // Exclude retired fighters and the current CAF champion only
+  const activeOnly = combined.filter(f => {
+    const main = fighters.find(x => x.id === f.idMain);
+    const isChampion = champions?.uflCAF && (f.ids || []).map(normId).includes(normId(champions.uflCAF));
+    return !main?.retired && !isChampion;
+  });
 
-  // Calculate points
-  activeOnly.forEach(f => {
-    f.points = calculateRankPoints(f.ids);
-  });
+  // Calculate points
+  activeOnly.forEach(f => {
+    f.points = calculateRankPoints(f.ids);
+  });
 
-  // Sort by points descending
-  activeOnly.sort((a, b) => b.points - a.points);
+  // Sort by points descending
+  activeOnly.sort((a, b) => (b.points || 0) - (a.points || 0));
 
-  // CAF-only site: include all active fighters (top 30)
-  const caf = activeOnly.slice(0, 30);
+  // CAF-only site: include all active fighters (top 30)
+  const caf = activeOnly.slice(0, 30);
 
-  return { caf };
+  return { caf };
 }
 
 function renderAll() {
   const { caf } = computeRankings();
-// 🧠 Cache the latest computed rankings for faster reloads
-localStorage.setItem('cachedRankings', JSON.stringify({ caf }));
 
+  // 🧠 Cache the latest computed rankings for faster reloads
+  localStorage.setItem('cachedRankings', JSON.stringify({ caf }));
 
   renderChampionCard('caf', $('caf-champion-card'));
- 
   renderRankings(caf, 'caf-rankings');
   renderPlayers();
   renderFights();
@@ -1652,6 +1669,7 @@ function refreshRankings() {
   renderAll();
   alert('Rankings refreshed!');
 }
+
   </script>
   <!-- END Part 4 of 6 -->
 <!-- START Part 5 of 6 -->
@@ -2648,5 +2666,3 @@ await recomputeAllFighterStats();
   </html>
   <!-- END Part 6 of 6 -->
         
-
-
