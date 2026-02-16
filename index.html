@@ -1567,14 +1567,15 @@ function calculateRankPoints(fighterIds, returnBreakdown = false) {
 
     breakdown.base += base;
 
-    // 🧩 Rank differential adjustment
-    if (isWin && selfRank > oppRank) {
-      bonus += Math.min(rankDiff * 0.05, 1);
-    } else if (isLoss && selfRank < oppRank) {
-      bonus -= Math.min(rankDiff * 0.025, 0.5);
-    }
+ // 🧩 Rank differential adjustment (TEMP DISABLED)
+// if (isWin && selfRank > oppRank) {
+//   bonus += Math.min(rankDiff * 0.05, 1);
+// } else if (isLoss && selfRank < oppRank) {
+//   bonus -= Math.min(rankDiff * 0.025, 0.5);
+// }
 
-    breakdown.modifiers += bonus;
+// breakdown.modifiers += bonus;
+
 
     // 🔝 Contender bonus block left as-is (currently disabled in your code)
     // if (f1Rank <= 10 || f2Rank <= 10) {
